@@ -34,6 +34,27 @@ import Image from "next/image";
 import { IVideo } from "@/lib/models/video";
 import { useToast } from "@/hooks/use-toast";
 
+// Cloudinary config (replace with your actual values)
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/auto/upload`;
+const CLOUDINARY_UPLOAD_PRESET =
+  process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
+
+const uploadToCloudinary = async (file: File, folder: string) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  formData.append("folder", folder);
+
+  const response = await fetch(CLOUDINARY_UPLOAD_URL, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) throw new Error("Cloudinary upload failed");
+  const data = await response.json();
+  return data.secure_url;
+};
+
 export function VideoManagement() {
   const [videos, setVideos] = useState<IVideo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -103,16 +124,23 @@ export function VideoManagement() {
 
   const handleThumbnailUpload = async () => {
     if (!selectedThumbnailFile) return;
-
+    // Check file size (5MB = 5 * 1024 * 1024 bytes)
+    if (selectedThumbnailFile.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description:
+          "Image size exceeds 5MB. Please upload an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return null;
+    }
     setIsUploadingThumbnail(true);
     const token = localStorage.getItem("adminToken");
-
     try {
       const uploadFormData = new FormData();
       uploadFormData.append("file", selectedThumbnailFile);
       uploadFormData.append("fileType", "image");
       uploadFormData.append("folder", "v-design/videos/thumbnails");
-
       const response = await fetch("/api/upload", {
         method: "POST",
         headers: {
@@ -120,7 +148,6 @@ export function VideoManagement() {
         },
         body: uploadFormData,
       });
-
       if (response.ok) {
         const data = await response.json();
         setFormData((prev) => ({ ...prev, thumbnailUrl: data.url }));
@@ -130,9 +157,10 @@ export function VideoManagement() {
         });
         return data.url;
       } else {
+        const data = await response.json();
         toast({
           title: "Error",
-          description: "Failed to upload thumbnail",
+          description: data.error || "Failed to upload thumbnail",
           variant: "destructive",
         });
         return null;
@@ -140,7 +168,7 @@ export function VideoManagement() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Error uploading thumbnail",
+        description: "Failed to upload thumbnail",
         variant: "destructive",
       });
       return null;
@@ -151,44 +179,29 @@ export function VideoManagement() {
 
   const handleVideoUpload = async () => {
     if (!selectedVideoFile) return;
-
-    setIsUploadingVideo(true);
-    const token = localStorage.getItem("adminToken");
-
-    try {
-      const uploadFormData = new FormData();
-      uploadFormData.append("file", selectedVideoFile);
-      uploadFormData.append("fileType", "video");
-      uploadFormData.append("folder", "v-design/videos");
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: uploadFormData,
+    // Check file size (20MB = 20 * 1024 * 1024 bytes)
+    if (selectedVideoFile.size > 20 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description:
+          "Video size exceeds 20MB. Please upload a video smaller than 20MB.",
+        variant: "destructive",
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setFormData((prev) => ({ ...prev, videoUrl: data.url }));
-        toast({
-          title: "Success",
-          description: "Video uploaded successfully!",
-        });
-        return data.url;
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to upload video",
-          variant: "destructive",
-        });
-        return null;
-      }
+      return null;
+    }
+    setIsUploadingVideo(true);
+    try {
+      const url = await uploadToCloudinary(
+        selectedVideoFile,
+        "v-design/videos"
+      );
+      setFormData((prev) => ({ ...prev, videoUrl: url }));
+      toast({ title: "Success", description: "Video uploaded successfully!" });
+      return url;
     } catch (error) {
       toast({
         title: "Error",
-        description: "Error uploading video",
+        description: "Failed to upload video",
         variant: "destructive",
       });
       return null;

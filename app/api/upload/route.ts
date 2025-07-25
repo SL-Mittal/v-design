@@ -26,6 +26,17 @@ export async function POST(request: NextRequest) {
     const isVideo = fileType === "video" || file.type.startsWith("video/");
     const resourceType = isVideo ? "video" : "image";
 
+    // Check file size for images (5MB = 5 * 1024 * 1024 bytes)
+    if (!isVideo && buffer.length > 5 * 1024 * 1024) {
+      return NextResponse.json(
+        {
+          error:
+            "Image size exceeds 5MB. Please upload an image smaller than 5MB.",
+        },
+        { status: 400 }
+      );
+    }
+
     let uploadOptions: any = {
       resource_type: resourceType,
       folder: folder,

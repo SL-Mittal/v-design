@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 export function WhatsAppButton() {
-  const phoneNumber = "9328837099";
-  //   const phoneNumber = "97644 47006";   //clinet contactnumber
-  const message = "Hi there!";
+  const phoneNumber = "97644 47006"; //clinet contactnumber
+  const message =
+    "Hello! I love your work. Can we discuss my architecture/interior design project?";
 
   const handleWhatsAppClick = () => {
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(

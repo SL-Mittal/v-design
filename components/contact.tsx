@@ -318,36 +318,21 @@ export function Contact() {
           transition={{ duration: 1, delay: 1.2 }}
           className="mt-24 pt-8 border-t border-white/30 bg-white/40 backdrop-blur-sm rounded-lg p-6 shadow-lg"
         >
-          <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0">
-            {/* <div className="flex items-center space-x-4">
-              <Image
-                src="/images/v-design-logo.png"
-                alt="V Design Logo"
-                width={60}
-                height={60}
-                className="w-12 h-12 object-contain"
-              />
-              <div className="font-['Cormorant_Garamond'] text-2xl font-light text-[#365545]">
-                V.DESIGN
-              </div>
-            </div> */}
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
             <p className="font-['Playfair_Display'] text-gray-700 text-center">
-              © {new Date().getFullYear()} V Design Studio. All rights reserved.
+              Copyright © {new Date().getFullYear()} V.Design. All rights
+              reserved.
             </p>
-            {/* <p className="font-['Cinzel'] text-[#365545] text-sm tracking-wide">
-              PUNE, INDIA
-            </p> */}
-          </div>
-          <div className="flex items-center justify-center mt-3">
-            <p className="font-['Playfair_Display'] text-gray-700 text-center ">
-              Powered by{" "}
+            <p className="font-['Playfair_Display'] text-gray-700 text-center">
+              Developed by{" "}
               <a
                 href="https://savannah-labs.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-['Cinzel'] text-[#365545] text-sm tracking-wide"
+                className="font-['Cinzel'] text-[#365545] text-sm tracking-wide relative group transition-all duration-300 hover:text-[#2a4136] font-bold"
               >
                 Savannah Labs
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#365545] transition-all duration-300 group-hover:w-full"></span>
               </a>
             </p>
           </div>
